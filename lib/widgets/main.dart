@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:personal_expenses/widgets/chart.dart';
 import 'package:personal_expenses/widgets/lista_transakcji.dart';
 import 'package:personal_expenses/widgets/nowa_transakcja.dart';
 import '../models/transakcje.dart';
@@ -12,10 +13,33 @@ void main() {
   class MyApp extends StatelessWidget{
 
     @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {  //context to objekt zawierajacy duzo informacji jak wybudiwac
 
       return MaterialApp(
       title:'Personal Expenses ',
+      theme: ThemeData(
+        primarySwatch: Colors.purple, //primaryColor to jeden kolor, a swatch podaje sie jeden kolor, ale generuje w tle inne odcienie
+      accentColor: Colors.amberAccent, //alternatywny kolor, sluzy do mieszania kolorow w aplikacji
+      //errorColor: Colors.red,
+          fontFamily: 'Quicksand',
+        textTheme: ThemeData.light().textTheme.copyWith(
+            title: TextStyle(
+              fontFamily: 'OpenSans',
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          button: TextStyle(color: Colors.yellow)
+        ),
+        appBarTheme: AppBarTheme(
+            textTheme: ThemeData.light().textTheme.copyWith(
+                title: TextStyle(
+                    fontFamily: 'OpenSans',
+                    fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                )
+            )
+        )
+      ),    //globalne style
       home: MyHomePage(),
       );
   }
@@ -33,18 +57,25 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<Transakcja> _userTransactions = [
     //mowi, ze transakcje bedzie zawierac liste z funkcji transakcja
 
-    Transakcja(
-      id: 'z1', title: 'Nowe buty', amount: 239.99, date: DateTime.now(),),
-    Transakcja(id: 'z2', title: 'Rolki', amount: 399.99, date: DateTime.now(),)
+   // Transakcja(
+    //  id: 'z1', title: 'Nowe buty', amount: 239.99, date: DateTime.now(),),
+   // Transakcja(id: 'z2', title: 'Rolki', amount: 399.99, date: DateTime.now(),)
 
 
   ];
 
-  void _addNewTransaction(String txTitle, double txAmount) {
+  List<Transakcja> get _recentTransactions {
+    return _userTransactions.where((tx) {
+      return tx.date.isAfter(DateTime.now().subtract(Duration(days: 7),
+      ));
+    }).toList();
+  }
+
+  void _addNewTransaction(String txTitle, double txAmount,  DateTime chosenDate) {
     final newTx = Transakcja(
       title: txTitle,
       amount: txAmount,
-      date: DateTime.now(),
+      date: chosenDate,
       id: DateTime.now().toString(),
     );
 
@@ -65,12 +96,20 @@ class _MyHomePageState extends State<MyHomePage> {
     },
       );
     }
+    void _deleteTransaction(String id) {
+    setState(() {
+      _userTransactions.removeWhere((tx) {
+        return tx.id==id;
+      });
+    });
+    }
 
     @override
     Widget build(BuildContext context) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('Personal Expenses App'),
+          //backgroundColor: Colors.yellowAccent,
+          title: Text('Personal Expenses App',),
           actions: <Widget>[
             IconButton(icon: Icon(Icons.add), onPressed: ()=>_startAddNewTransaction(context),)
           ],
@@ -85,17 +124,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
             children: <Widget>[
 
-              Container(
-                width: double.infinity,
-                child: Card( //wykres z wydatkami, rozmiar card zalezy od child, aletekst zalezy od rozmiaru parent, wiec musze wprowadzic nowy widget, ktorym bede mogl zmienic rozmiar
+              Chart(_recentTransactions),
 
-                  color: Colors.red,
-                  child: Text('CHART'),
-                  elevation: 5,
-                ),
-              ),
-
-              ListaTransakcji(_userTransactions)
+              ListaTransakcji(_userTransactions, _deleteTransaction)
 
 
             ],
