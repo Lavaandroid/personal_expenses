@@ -51,54 +51,56 @@ class _NowaTransakcjaState extends State<NowaTransakcja> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return SingleChildScrollView(   //bedzie mozna scrollowac arkusz w widoku klawiatury
+      child: Card(
 
-      elevation: 5,
-      child: Container(
+        elevation: 5,
+        child: Container(
 
-        padding: EdgeInsets.all(10),
+          padding: EdgeInsets.only(top: 10, left: 10, right: 10, bottom: MediaQuery.of(context).viewInsets.bottom + 10),    //mowi ile ma zajac klawiatura
 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
 
-          children: <Widget> [
+            children: <Widget> [
 
-            TextField(decoration: InputDecoration(labelText: 'Title'),
+              TextField(decoration: InputDecoration(labelText: 'Title'),
 
-              controller: _titleController,
-              onSubmitted: (_)=>_submitData(),
+                controller: _titleController,
+                onSubmitted: (_)=>_submitData(),
 
-              //onChanged: (value) {
-               // titleInput=value;
-              //},
-            ),
-            TextField(decoration: InputDecoration(labelText: 'Amount'),
+                //onChanged: (value) {
+                 // titleInput=value;
+                //},
+              ),
+              TextField(decoration: InputDecoration(labelText: 'Amount'),
 
-              controller: _amountController,
-              keyboardType: TextInputType.number, //powoduje, ze klawiatura wyswietli tylko cyfry
-              onSubmitted: (_) => _submitData(),
-              //onChanged: (val)=>amountInput=val,
-            ),
+                controller: _amountController,
+                keyboardType: TextInputType.number, //powoduje, ze klawiatura wyswietli tylko cyfry
+                onSubmitted: (_) => _submitData(),
+                //onChanged: (val)=>amountInput=val,
+              ),
 
-            Container(
-              height: 70,
-              child: Row(
-                children: <Widget> [
-                Expanded(
-                    child: Text(_selectedDate== null ? 'Nie wybrano daty' : DateFormat.yMd().format(_selectedDate))),
-                TextButton(
-                  child: Text('Wybierz date', style: TextStyle(fontWeight: FontWeight.bold),), onPressed: _presentDatePicker, style: ButtonStyle(foregroundColor: MaterialStateProperty.all(Colors.green)),)
-              ],),
-            ),
+              Container(
+                height: 70,
+                child: Row(
+                  children: <Widget> [
+                  Expanded(
+                      child: Text(_selectedDate== null ? 'Nie wybrano daty' : DateFormat.yMd().format(_selectedDate))),
+                  TextButton(
+                    child: Text('Wybierz date', style: TextStyle(fontWeight: FontWeight.bold),), onPressed: _presentDatePicker, style: ButtonStyle(foregroundColor: MaterialStateProperty.all(Colors.green)),)
+                ],),
+              ),
 
-            RaisedButton(
-              child: Text('Dodaj transakcję'),
-                color: Theme.of(context).primaryColor,
-                textColor:Theme.of(context).textTheme.button.color,
-                onPressed: ()=> _submitData,
+              RaisedButton(
+                child: Text('Dodaj transakcję'),
+                  color: Theme.of(context).primaryColor,
+                  textColor:Theme.of(context).textTheme.button.color,
+                  onPressed: ()=> _submitData,
 
 
-            )],
+              )],
+          ),
         ),
       ),
     );

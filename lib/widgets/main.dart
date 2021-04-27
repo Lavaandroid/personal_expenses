@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:personal_expenses/widgets/chart.dart';
 import 'package:personal_expenses/widgets/lista_transakcji.dart';
 import 'package:personal_expenses/widgets/nowa_transakcja.dart';
@@ -7,7 +8,10 @@ import '../models/transakcje.dart';
 
 
 void main() {
+  //WidgetsFlutterBinding.ensureInitialized();
+  //SystemChrome.setPreferredOrientations([DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);    //wymusza orientacje pionowa telefonu, aplikacja sie nie obroci
   runApp(MyApp());
+  
 }
 
   class MyApp extends StatelessWidget{
@@ -64,6 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   ];
 
+  bool _showChart =false;
+
   List<Transakcja> get _recentTransactions {
     return _userTransactions.where((tx) {
       return tx.date.isAfter(DateTime.now().subtract(Duration(days: 7),
@@ -106,14 +112,25 @@ class _MyHomePageState extends State<MyHomePage> {
 
     @override
     Widget build(BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(
-          //backgroundColor: Colors.yellowAccent,
-          title: Text('Personal Expenses App',),
-          actions: <Widget>[
-            IconButton(icon: Icon(Icons.add), onPressed: ()=>_startAddNewTransaction(context),)
-          ],
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;     //sprawdzi w jakiej orientacji jest  urzadzenie
+    final mediaQuery= MediaQuery.of(context);   //zeby zyskac performance i ominac dodatkowe renderowanie, gdy uzywam duzo mediaQuery zamiast za kazdym razem MediaQuery.of(context) to tworze zmienna
+    final appBar=AppBar(
+      //backgroundColor: Colors.yellowAccent,
+      title: Text(
+        'Personal Expenses App',
+      ),
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(Icons.add),
+          onPressed: ()=>_startAddNewTransaction(context),
         ),
+      ],
+    );
+    final txListWidget = Container(
+        height: (MediaQuery.of(context).size.height - appBar.preferredSize.height- MediaQuery.of(context).padding.top)*0.7,
+        child: ListaTransakcji(_userTransactions, _deleteTransaction));
+      return Scaffold(
+        appBar: appBar,
         body: SingleChildScrollView( // SingleChildScrollView dodaje mozliwosc scrollowania, trzeba dodac zawsze przy body
           child: Column(
 
@@ -124,9 +141,31 @@ class _MyHomePageState extends State<MyHomePage> {
 
             children: <Widget>[
 
-              Chart(_recentTransactions),
+              if(isLandscape) Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget> [
+                Text('Show Cart'),
+                Switch(value: _showChart, onChanged: (val) {
+                  setState(() {
+                    _showChart=val;
+                  });
+                },)
 
-              ListaTransakcji(_userTransactions, _deleteTransaction)
+              ],),
+
+            if (!isLandscape)   Container(
+              height: (MediaQuery.of(context).size.height - appBar.preferredSize.height-MediaQuery.of(context).padding.top)*0.3, // mediaquery robi responsywnosc, conrainer bedzie zajmowal 30%, padding top odejmie miejsce zajmowane przez status bar
+              child: Chart(_recentTransactions),
+            ),
+
+            if(!isLandscape) txListWidget,
+            if (isLandscape) _showChart
+             ?   Container(
+                  height: (mediaQuery.size.height - appBar.preferredSize.height-mediaQuery.padding.top)*0.7, // mediaquery robi responsywnosc, conrainer bedzie zajmowal 30%, padding top odejmie miejsce zajmowane przez status bar
+                  child: Chart(_recentTransactions),
+            )
+
+             : txListWidget
 
 
             ],

@@ -15,17 +15,18 @@ class ListaTransakcji extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {//lista transakcji, musze utworzyc mape z transakcje, zeby wyswietlana lista byla dynamiczna, nie wiem ile transakcji ktos wpisze
-    return Container(
-      height: 450,
-      child: transakcje.isEmpty ? Column(children: <Widget> [
+    return  transakcje.isEmpty ? LayoutBuilder(builder: (ctx, constraints) {
+      return Column(children: <Widget> [
         Text(
           'Brak transakcji',
           style: Theme.of(context).textTheme.title,
         ),
         SizedBox(height: 10),  //doda box o wyznaczonym rozmiarze
-        Container( height: 200,child: Image.asset('assets/images/waiting.png', fit: BoxFit.cover,)),
+        Container( height: constraints.maxHeight * 0.6,child: Image.asset('assets/images/waiting.png', fit: BoxFit.cover,)),
       ],
-      )
+      );
+    }
+    )
       : ListView.builder(//ListViw to column z widgetem do scrollowania, ma on nieskonczona wysoskosc    Ewentualnie ListViw.builder() stosowany gdy lista bedzie dluga, bo renderuje tylko to co widac na ekranie
 
         itemBuilder: (ctx, index){
@@ -85,7 +86,15 @@ class ListaTransakcji extends StatelessWidget {
               ),
               subtitle: Text(DateFormat.yMMMd().format(transakcje[index].date)
               ),
-              trailing: IconButton(icon: Icon(Icons.delete), color: Theme.of(context).errorColor, onPressed: ()=> deleteTx(transakcje[index].id),),
+
+              trailing:
+              MediaQuery.of(context).size.width >200 ? TextButton.icon(icon: Icon(Icons.delete, color: Theme.of(context).errorColor,),
+
+              label: Text('Usuń', style: TextStyle(color: Colors.red),),
+
+                  onPressed: ()=> deleteTx(transakcje[index].id)
+              )
+             : IconButton(icon: Icon(Icons.delete), color: Theme.of(context).errorColor, onPressed: ()=> deleteTx(transakcje[index].id),),
 
             ),
           );
@@ -93,6 +102,6 @@ class ListaTransakcji extends StatelessWidget {
         },
         itemCount: transakcje.length, //dzieki temu kod wie ile razy musi wyrenderowac
 
-    ));
+    );
   }
 }
